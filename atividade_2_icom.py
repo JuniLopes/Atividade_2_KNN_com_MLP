@@ -21,9 +21,7 @@ features
 targets = parkison[:,754]
 targets
 
-parameters = {'hidden_layer_sizes':[(3,5),3], 'activation': 
-              ['identity', 'logistic', 'tanh', 'relu'], 'max_iter': [200],
-              'learning_rate_init': [0.001,0.01,0.1]}
+parameters = {'hidden_layer_sizes':[(3,5),3], 'activation': ['identity', 'logistic', 'tanh', 'relu'], 'max_iter': [100,200],'learning_rate_init': [0.001,0.01,0.1]}
 mlp = MLPClassifier(random_state=1, max_iter=300)
 
 clfAccuracy = GridSearchCV(mlp, parameters,cv=5, scoring="accuracy")
