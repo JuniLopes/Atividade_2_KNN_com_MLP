@@ -9,42 +9,46 @@ equipe: Julane Bezerra
 """
 
 import numpy as np
-parkinson = np.genfromtxt('D:/OneDrive/Faculdade/S7/parkinson/parkinson_formated.csv', delimiter= ',')
-data = parkinson
-type(parkinson)
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import GridSearchCV
 
-features = data[:,:754]
+parkison = np.genfromtxt('D:/OneDrive/Faculdade/S7/parkinson/parkinson_formated.csv', delimiter = ',')
+type(parkison)
+
+features = parkison[:,:754]
 features
-targets = data[:, 754]
+
+targets = parkison[:,754]
 targets
 
-from sklearn import preprocessing
-min_max_scaler = preprocessing.MinMaxScaler()
-features_norm = min_max_scaler.fit_transform(features)
-features_norm 
+parameters = {'hidden_layer_sizes':[(3,5),3], 'activation': 
+              ['identity', 'logistic', 'tanh', 'relu'], 'max_iter': [200],
+              'learning_rate_init': [0.001,0.01,0.1]}
+mlp = MLPClassifier(random_state=1, max_iter=300)
 
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(features_norm, targets, test_size=0.2)
-y_train
+clfAccuracy = GridSearchCV(mlp, parameters,cv=5, scoring="accuracy")
+clfPrecision = GridSearchCV(mlp, parameters,cv=5, scoring="precision")
+clfRecall = GridSearchCV(mlp, parameters,cv=5, scoring="recall")
+clfF1 = GridSearchCV(mlp, parameters,cv=5, scoring="f1")
 
-print(X_train.shape)
-print(y_train.shape)
+clfAccuracy.fit(features, targets)
+clfPrecision.fit(features, targets)
+clfRecall.fit(features, targets)
+clfF1.fit(features, targets)
 
-print(X_test.shape)
-print(y_test.shape)
+sorted(clfAccuracy.cv_results_.keys())
+sorted(clfPrecision.cv_results_.keys())
+sorted(clfRecall.cv_results_.keys())
+sorted(clfF1.cv_results_.keys())
 
-X_train
-y_train
+print("Accuracy",clfAccuracy.best_params_)
+print("precision",clfPrecision.best_params_)
+print("recall",clfRecall.best_params_)
+print("f1",clfF1.best_params_)
 
-#Importa a classe
-from sklearn.neighbors import KNeighborsClassifier
-#instancia um objeto da tecnica de classificacao KNN
-knn = KNeighborsClassifier(n_neighbors=3, metric="euclidean")
-# treina um modelo de classificacao
-knn.fit(X_train, y_train)
-# testa o modelo de classificacao
-y_pred=knn.predict(X_test)
-print("Classe predita:   ")
-print(y_pred)
-print("Classe verdadeira:")
-print(y_test)
+print(clfPrecision.best_score_)
+print(clfAccuracy.best_score_)
+print(clfRecall.best_score_)
+print(clfF1.best_score_)
+
+print(sum(clfPrecision.best_score_)/5)
