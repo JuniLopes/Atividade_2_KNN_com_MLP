@@ -9,8 +9,6 @@ equipe: Julane Bezerra
 """
 
 import numpy as np
-from sklearn.neural_network import MLPClassifier
-from sklearn.model_selection import GridSearchCV
 
 parkison = np.genfromtxt('D:/OneDrive/Faculdade/S7/parkinson/parkinson_formated.csv', delimiter = ',')
 type(parkison)
@@ -21,32 +19,26 @@ features
 targets = parkison[:,754]
 targets
 
-parameters = {'hidden_layer_sizes':[(3,5),3], 'activation': ['identity', 'logistic', 'tanh', 'relu'], 'max_iter': [100,200],'learning_rate_init': [0.001,0.01,0.1]}
-mlp = MLPClassifier(random_state=1, max_iter=300)
+from sklearn import preprocessing
+min_max_scaler = preprocessing.MinMaxScaler()
+features_norm = min_max_scaler.fit_transform(features)
 
-clfAccuracy = GridSearchCV(mlp, parameters,cv=5, scoring="accuracy")
-clfPrecision = GridSearchCV(mlp, parameters,cv=5, scoring="precision")
-clfRecall = GridSearchCV(mlp, parameters,cv=5, scoring="recall")
-clfF1 = GridSearchCV(mlp, parameters,cv=5, scoring="f1")
+from sklearn.model_selection import train_test_split
 
-clfAccuracy.fit(features, targets)
-clfPrecision.fit(features, targets)
-clfRecall.fit(features, targets)
-clfF1.fit(features, targets)
 
-sorted(clfAccuracy.cv_results_.keys())
-sorted(clfPrecision.cv_results_.keys())
-sorted(clfRecall.cv_results_.keys())
-sorted(clfF1.cv_results_.keys())
+# divide os dados em dois conjuntos (treino e teste)
+X_train, X_test, y_train, y_test = train_test_split(features_norm, targets, test_size=0.2)
 
-print("Accuracy",clfAccuracy.best_params_)
-print("precision",clfPrecision.best_params_)
-print("recall",clfRecall.best_params_)
-print("f1",clfF1.best_params_)
+from sklearn.neural_network import MLPClassifier
+import matplotlib.pyplot as plt
 
-print(clfPrecision.best_score_)
-print(clfAccuracy.best_score_)
-print(clfRecall.best_score_)
-print(clfF1.best_score_)
+mlp=MLPClassifier(activation="tanh",max_iter=600,solver="adam",random_state=2,early_stopping=False,learning_rate_init=0.001)
+mlp.fit(X_train,y_train)
 
-print(sum(clfPrecision.best_score_)/5)
+plt.plot(mlp.loss_curve_,label="treino")
+
+plt.title("Curva do erro de treinamento \n learning_rate 0.001 \n max_iter 100")
+plt.xlabel("Iterações")
+plt.ylabel("Erro")
+plt.legend()
+print (mlp.loss_curve_)
